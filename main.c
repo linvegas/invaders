@@ -45,23 +45,14 @@ int main(void)
     Enemy enemies[N_ENEMIES];
 
     for (int i = 0; i < N_ENEMIES; i++) {
-        enemies[i].rect.x = 40 * i;
-        enemies[i].rect.y = SCREEN_H * 0.12;
-        // enemies[i].rect.y = GetRandomValue(0, 60);
         enemies[i].rect.width = 30;
         enemies[i].rect.height = 30;
+        enemies[i].rect.x = (enemies[i].rect.width + 20) * (i + 1);
+        enemies[i].rect.y = SCREEN_H * 0.12;
         enemies[i].speed = 2;
         enemies[i].activated = 1;
         enemies[i].color = LIGHTGRAY;
     }
-
-    // Enemy enemy = {
-    //     .rect.x = SCREEN_W/2, .rect.y = SCREEN_H * 0.12,
-    //     .rect.width = 30,     .rect.height = 30,
-    //     .speed = 2,
-    //     .activated = 1,
-    //     .color = LIGHTGRAY,
-    // };
 
     Bullet bullets[N_BULLETS];
 
@@ -78,6 +69,8 @@ int main(void)
     SetTargetFPS(60);
 
     int score = 0;
+    int screen_padding = 50;
+    int enemies_alive = N_ENEMIES;
 
     while(!WindowShouldClose()) {
 
@@ -118,6 +111,7 @@ int main(void)
                             score++;
                             bullets[i].activated = 0;
                             enemies[j].activated = 0;
+                            enemies_alive--;
                         }
                     }
                 }
@@ -127,24 +121,18 @@ int main(void)
         for (int i = 0; i < N_ENEMIES; i++) {
             if (enemies[i].activated) {
                 enemies[i].rect.x += enemies[i].speed;
-                if ((enemies[i].rect.x + enemies[i].rect.width >= SCREEN_W) || (enemies[i].rect.x <= 0)) enemies[i].speed *= -1.0f;
-            } /* else {
-               enemies[i].rect.x = GetRandomValue(50, SCREEN_W - (50 + enemies[i].rect.width));
-               enemies[i].rect.y = SCREEN_H * 0.12;
-               enemies[i].speed = (GetRandomValue(0, 1) % 2 == 0) ? 2 : -2;
-               enemies[i].activated = 1;
-            } */
+                if ((enemies[i].rect.x + enemies[i].rect.width >= SCREEN_W - screen_padding) || (enemies[i].rect.x <= screen_padding)) enemies[i].speed *= -1.0f;
+            }
         }
 
-        // if (enemy.activated) {
-        //     enemy.rect.x += enemy.speed;
-        //     if ((enemy.rect.x + enemy.rect.width >= (SCREEN_W - 50)) || (enemy.rect.x <= 50)) enemy.speed *= -1.0f;
-        // } else {
-        //     enemy.rect.x = GetRandomValue(50, SCREEN_W - (50 + enemy.rect.width));
-        //     enemy.rect.y = SCREEN_H * 0.12;
-        //     enemy.speed = (GetRandomValue(0, 1) % 2 == 0) ? 2 : -2;
-        //     enemy.activated = 1;
-        // }
+        if (enemies_alive <= 0) {
+            for (int i = 0; i < N_ENEMIES; i++) {
+                enemies[i].rect.x = (enemies[i].rect.width + 20) * (i + 1);
+                enemies[i].speed = 2;
+                enemies[i].activated = 1;
+            }
+            enemies_alive = N_ENEMIES;
+        }
 
         BeginDrawing();
 
