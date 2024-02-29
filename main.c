@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define ENEMIES_ROW 4
-#define ENEMIES_COL 10
+#define ENEMIES_ROW 5
+#define ENEMIES_COL 11
 #define ENEMIES_GAP 20
 #define ENEMIES_COUNT ENEMIES_ROW*ENEMIES_COL
 #define BULLETS_COUNT 10
@@ -63,7 +63,7 @@ int main(void)
             enemies[i][j].rect.height = 30;
             enemies[i][j].rect.x = (enemies[i][j].rect.width + ENEMIES_GAP) * j + SCREEN_PADDING_X;
             enemies[i][j].rect.y = (enemies[i][j].rect.height + ENEMIES_GAP) * i + SCREEN_PADDING_Y;
-            enemies[i][j].speed = 1;
+            enemies[i][j].speed = 6;
             enemies[i][j].activated = 1;
             enemies[i][j].color = LIGHTGRAY;
         }
@@ -75,7 +75,7 @@ int main(void)
         .rect.width = enemies[0][0].rect.width * ENEMIES_COL + (ENEMIES_GAP * ENEMIES_COL) - ENEMIES_GAP,
         .rect.height = enemies[0][0].rect.height * ENEMIES_ROW + (ENEMIES_GAP * ENEMIES_ROW) - ENEMIES_GAP,
         .thickness = 2,
-        .speed = 1,
+        .speed = enemies[0][0].speed,
         .color = RED,
     };
 
@@ -95,6 +95,9 @@ int main(void)
 
     int score = 0;
     int enemies_alive = ENEMIES_COUNT;
+
+    float enemy_timer = 0.0f;
+    // float row_timer[ENEMIES_ROW] = {0};
 
     while(!WindowShouldClose()) {
 
@@ -139,15 +142,39 @@ int main(void)
             }
         }
 
-        enemy_area.rect.x += enemy_area.speed;
-        if ((enemy_area.rect.x + enemy_area.rect.width >= SCREEN_W - SCREEN_PADDING_X) || (enemy_area.rect.x <= SCREEN_PADDING_X)) enemy_area.speed *= -1.0f;
+        enemy_timer += GetFrameTime();
 
-        for (int i = 0; i < ENEMIES_ROW; i++) {
-            for (int j = 0; j < ENEMIES_COL; j++) {
-                if (enemies[i][j].activated) {
-                    enemies[i][j].rect.x += enemies[i][j].speed;
-                    if ((enemy_area.rect.x + enemy_area.rect.width >= SCREEN_W - SCREEN_PADDING_X) || (enemy_area.rect.x <= SCREEN_PADDING_X)) enemies[i][j].speed *= -1.0f;
+        if (enemy_timer >= 1.0f) {
+            enemy_area.rect.x += enemy_area.speed;
+            if (
+                (enemy_area.rect.x + enemy_area.rect.width >= SCREEN_W - SCREEN_PADDING_X) ||
+                (enemy_area.rect.x <= SCREEN_PADDING_X)
+            ) {
+                enemy_area.rect.y += enemies[0][0].rect.height;
+                enemy_area.speed *= -1.0f;
+            }
+        }
+
+        if (enemy_timer >= 1.0f) {
+            for (int i = 0; i < ENEMIES_ROW; i++) {
+                // row_timer[i] += GetFrameTime();
+                // if (row_timer[i] >= 0.25f) {
+                for (int j = 0; j < ENEMIES_COL; j++) {
+                    if (enemies[i][j].activated) {
+                        enemies[i][j].rect.x += enemies[i][j].speed;
+
+                        if (
+                            (enemy_area.rect.x + enemy_area.rect.width >= SCREEN_W - SCREEN_PADDING_X) ||
+                            (enemy_area.rect.x <= SCREEN_PADDING_X)
+                        ) {
+                            enemies[i][j].rect.y += enemies[0][0].rect.height;
+                            enemies[i][j].speed *= -1.0f;
+                        }
+                    }
+                    // row_timer[i] = 0.0f;
                 }
+                enemy_timer = 0.0f;
+                // }
             }
         }
 
@@ -178,7 +205,7 @@ int main(void)
             }
         }
 
-        DrawRectangleLinesEx(enemy_area.rect, enemy_area.thickness, enemy_area.color);
+        // DrawRectangleLinesEx(enemy_area.rect, enemy_area.thickness, enemy_area.color);
 
         DrawText(TextFormat("Score: %i", score), 10, SCREEN_H - 45 + 20, 20, WHITE);
 
