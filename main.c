@@ -7,6 +7,7 @@
 #define ENEMIES_COL 11
 #define ENEMIES_GAP 20
 #define ENEMIES_COUNT ENEMIES_ROW*ENEMIES_COL
+#define ENEMIES_SPEED 6
 #define BULLETS_COUNT 10
 
 typedef struct {
@@ -49,7 +50,7 @@ int main(void)
         .rect.width = 30,
         .rect.height = 30,
         .speed = 4,
-        .color = GREEN,
+        .color = LIME,
     };
 
     const int SCREEN_PADDING_X = 50;
@@ -57,15 +58,17 @@ int main(void)
 
     Enemy enemies[ENEMIES_ROW][ENEMIES_COL];
 
+    Color enemy_colors[5] = {ORANGE, YELLOW, GREEN, SKYBLUE, PURPLE};
+
     for (int i = 0; i < ENEMIES_ROW; i++) {
         for (int j = 0; j < ENEMIES_COL; j++) {
             enemies[i][j].rect.width = 30;
             enemies[i][j].rect.height = 30;
             enemies[i][j].rect.x = (enemies[i][j].rect.width + ENEMIES_GAP) * j + SCREEN_PADDING_X;
             enemies[i][j].rect.y = (enemies[i][j].rect.height + ENEMIES_GAP) * i + SCREEN_PADDING_Y;
-            enemies[i][j].speed = 6;
+            enemies[i][j].speed = ENEMIES_SPEED;
             enemies[i][j].activated = 1;
-            enemies[i][j].color = LIGHTGRAY;
+            enemies[i][j].color = enemy_colors[i];
         }
     }
 
@@ -88,7 +91,7 @@ int main(void)
         bullets[i].rect.height = 15;
         bullets[i].speed = 10;
         bullets[i].activated = 0;
-        bullets[i].color = WHITE;
+        bullets[i].color = GREEN;
     }
 
     SetTargetFPS(60);
@@ -97,7 +100,6 @@ int main(void)
     int enemies_alive = ENEMIES_COUNT;
 
     float enemy_timer = 0.0f;
-    // float row_timer[ENEMIES_ROW] = {0};
 
     while(!WindowShouldClose()) {
 
@@ -146,7 +148,7 @@ int main(void)
 
         if (enemy_timer >= 1.0f) {
             enemy_area.rect.x += enemy_area.speed;
-            if (
+            if ( // Cute if
                 (enemy_area.rect.x + enemy_area.rect.width >= SCREEN_W - SCREEN_PADDING_X) ||
                 (enemy_area.rect.x <= SCREEN_PADDING_X)
             ) {
@@ -157,8 +159,6 @@ int main(void)
 
         if (enemy_timer >= 1.0f) {
             for (int i = 0; i < ENEMIES_ROW; i++) {
-                // row_timer[i] += GetFrameTime();
-                // if (row_timer[i] >= 0.25f) {
                 for (int j = 0; j < ENEMIES_COL; j++) {
                     if (enemies[i][j].activated) {
                         enemies[i][j].rect.x += enemies[i][j].speed;
@@ -171,14 +171,16 @@ int main(void)
                             enemies[i][j].speed *= -1.0f;
                         }
                     }
-                    // row_timer[i] = 0.0f;
                 }
                 enemy_timer = 0.0f;
-                // }
             }
         }
 
         if (enemies_alive <= 0) {
+            enemy_area.rect.x = SCREEN_PADDING_X;
+            enemy_area.rect.y = SCREEN_PADDING_Y;
+            enemy_area.speed = ENEMIES_SPEED;
+
             for (int i = 0; i < ENEMIES_ROW; i++) {
                 for (int j = 0; j < ENEMIES_COL; j++) {
                     enemies[i][j].rect.x = (enemies[i][j].rect.width + ENEMIES_GAP) * j + enemy_area.rect.x;
@@ -192,7 +194,7 @@ int main(void)
 
         BeginDrawing();
 
-        ClearBackground(GetColor(0x2f4f4fff));
+        ClearBackground(BLACK);
 
         DrawRectangleRec(ship.rect, ship.color);
 
@@ -201,7 +203,7 @@ int main(void)
 
         for (int i = 0; i < ENEMIES_ROW; i++) {
             for (int j = 0; j < ENEMIES_COL; j++) {
-                    if (enemies[i][j].activated) DrawRectangleRec(enemies[i][j].rect, enemies[i][j].color);
+                if (enemies[i][j].activated) DrawRectangleRec(enemies[i][j].rect, enemies[i][j].color);
             }
         }
 
