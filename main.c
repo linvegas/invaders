@@ -100,6 +100,7 @@ int main(void)
     int enemies_alive = ENEMIES_COUNT;
 
     float enemy_timer = 0.0f;
+    float frame_time_limit = 1.0f;
 
     while(!WindowShouldClose()) {
 
@@ -146,7 +147,7 @@ int main(void)
 
         enemy_timer += GetFrameTime();
 
-        if (enemy_timer >= 1.0f) {
+        if (enemy_timer >= frame_time_limit) {
             enemy_area.rect.x += enemy_area.speed;
             if ( // Cute if
                 (enemy_area.rect.x + enemy_area.rect.width >= SCREEN_W - SCREEN_PADDING_X) ||
@@ -157,18 +158,22 @@ int main(void)
             }
         }
 
-        if (enemy_timer >= 1.0f) {
+        if (enemy_timer >= frame_time_limit) {
             for (int i = 0; i < ENEMIES_ROW; i++) {
                 for (int j = 0; j < ENEMIES_COL; j++) {
                     if (enemies[i][j].activated) {
                         enemies[i][j].rect.x += enemies[i][j].speed;
 
-                        if (
+                        if ( // Cute if
                             (enemy_area.rect.x + enemy_area.rect.width >= SCREEN_W - SCREEN_PADDING_X) ||
                             (enemy_area.rect.x <= SCREEN_PADDING_X)
                         ) {
                             enemies[i][j].rect.y += enemies[0][0].rect.height;
                             enemies[i][j].speed *= -1.0f;
+                            if (i == ENEMIES_ROW - 1 && j == ENEMIES_COL - 1) {
+                                // frame_time_limit -= (frame_time_limit <= 0.5) ? 0.05f : 0.2f;
+                                frame_time_limit = frame_time_limit / 2;
+                            }
                         }
                     }
                 }
@@ -190,6 +195,7 @@ int main(void)
                 }
             }
             enemies_alive = ENEMIES_COUNT;
+            frame_time_limit = 1.0f;
         }
 
         BeginDrawing();
