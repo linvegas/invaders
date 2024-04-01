@@ -1,7 +1,7 @@
-#include <raylib.h>
-
 #include <stdio.h>
 #include <string.h>
+
+#include "raylib.h"
 
 #define ENEMIES_ROW 5
 #define ENEMIES_COL 11
